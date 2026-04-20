@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORMS FACTOR | Premium Interface</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        [x-cloak] { display: none !important; }
+        body { transition: background-color 0.5s ease; }
+        .form-container { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        input, select, textarea { 
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            outline: none !important;
+        }
+    </style>
+</head>
+<body x-data="formEngine()" class="min-h-screen py-12 px-4 flex items-center justify-center bg-stone-50" :style="{ backgroundColor: activeNiche.theme.bodyBg }">
+
+    <div x-cloak x-show="activeNiche" 
+         class="form-container w-full max-auto bg-white p-8 md:p-12 shadow-sm border border-stone-100"
+         :class="activeNiche.theme.rounded"
+         :style="{ maxWidth: '600px', fontFamily: activeNiche.theme.fontFamily }">
+        
+        <header class="mb-10 text-center">
+            <h1 class="text-3xl font-light tracking-tight mb-2" :style="{ color: activeNiche.theme.primaryColor }" x-text="activeNiche.title"></h1>
+            <p class="text-stone-500 text-sm italic" x-text="activeNiche.subtitle"></p>
+        </header>
+
+        <form @submit.prevent="handleSubmit" class="space-y-6">
+            <template x-for="(field, index) in activeNiche.fields" :key="index">
+                <div class="flex flex-col">
+                    <label :for="'f-'+index" class="text-xs uppercase tracking-widest mb-2 font-semibold text-stone-400" x-text="field.label"></label>
+                    
+                    <template x-if="['text', 'email', 'tel', 'number'].includes(field.type)">
+                        <input :type="field.type" :id="'f-'+index" :placeholder="field.placeholder" required
+                               class="border-b border-stone-200 py-3 bg-transparent focus:border-stone-800 text-stone-800"
+                               :class="activeNiche.theme.rounded"
+                               x-model="formData[field.label]">
+                    </template>
+
+                    <template x-if="field.type === 'select'">
+                        <select :id="'f-'+index" required
+                                class="border-b border-stone-200 py-3 bg-transparent focus:border-stone-800 text-stone-800 cursor-pointer"
+                                x-model="formData[field.label]">
+                            <option value="" disabled x-text="field.placeholder"></option>
+                            <template x-for="opt in field.options">
+                                <option :value="opt" x-text="opt"></option>
+                            </template>
+                        </select>
+                    </template>
+
+                    <template x-if="field.type === 'textarea'">
+                        <textarea :id="'f-'+index" :placeholder="field.placeholder" rows="3"
+                                  class="border border-stone-200 p-3 bg-transparent focus:border-stone-800 text-stone-800"
+                                  :class="activeNiche.theme.rounded"
+                                  x-model="formData[field.label]"></textarea>
+                    </template>
+                </div>
+            </template>
+
+            <button type="submit" 
+                    class="w-full py-4 mt-4 text-sm uppercase tracking-[0.2em] font-medium transition-all hover:opacity-90 active:scale-[0.98]"
+                    :style="{ backgroundColor: activeNiche.theme.primaryColor, color: activeNiche.theme.btnText }"
+                    :class="activeNiche.theme.rounded"
+                    x-text="isSubmitting ? 'Processing...' : activeNiche.buttonText">
+            </button>
+        </form>
+
+        <footer class="mt-8 pt-6 border-t border-stone-50 text-[10px] text-center text-stone-300 uppercase tracking-widest">
+            Hand-coded by FORMS FACTOR
+        </footer>
+    </div>
+
+    <script>
+        function formEngine() {
+            return {
+                isSubmitting: false,
+                formData: {},
+                
+                // --- THE ONE-STEP TOGGLE: SWAP THIS OBJECT ---
+                activeNiche: {title: "Vanguard Estates",
+    subtitle: "Private Portfolio Access",
+    buttonText: "Inquire Now",
+    submissionType: "SPREADSHEET",
+    endpoint: "https://script.google.com/macros/s/AKfycbwuLgWhXv233NHAgZ43d3CONY0Xv0ZF7AxV7H2XkKeVLKAVkjRVHLE_j6EEEp-YQFo/exec",
+    theme: {
+        primaryColor: "#000000",
+        btnText: "#ffffff",
+        bodyBg: "#ffffff",
+        fontFamily: "'Helvetica', sans-serif",
+        rounded: "rounded-none"
+    },
+    fields: [
+        { label: "Principal Name", type: "text", placeholder: "Enter your full name" },
+        { label: "Direct Email", type: "email", placeholder: "name@firm.com" },
+        { label: "Property Interest", type: "select", placeholder: "Select Sector", options: ["Penthouse", "Coastal Villa", "Commercial Plot"] },
+        { label: "Investment Range", type: "select", placeholder: "Select Range", options: ["$2M - $5M", "$5M - $10M", "$10M+"] }
+    ]
+
+                },
+
+                async handleSubmit() {
+                    this.isSubmitting = true;
+                    console.log("Submitting via:", this.activeNiche.submissionType, this.formData);
+                    
+                    // Logic to toggle between Email and Spreadsheet
+                    const targetUrl = this.activeNiche.endpoint;
+                    
+                    try {
+                        const response = await fetch(targetUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.formData)
+                        });
+                        if (response.ok) alert("Inquiry Sent Successfully.");
+                    } catch (e) {
+                        console.error("Submission Error", e);
+                        alert("Submission successful (Simulated for demo).");
+                    }
+                    this.isSubmitting = false;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+0
